@@ -10,7 +10,7 @@ __created__ = '26.09.2015'
 
 
 class AuxiliaryResource(Resource, BouserPlugin):
-    cas = Dependency()
+    cas = Dependency('bouser.castiel')
 
     def render(self, request):
         """
