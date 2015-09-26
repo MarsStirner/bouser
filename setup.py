@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 __author__ = 'viruzzz-kun'
 __version__ = '0.1'
@@ -15,15 +15,7 @@ if __name__ == '__main__':
         author_email="viruzzz.soft@gmail.com",
         license='ISC',
         url="http://github.com/hitsl/bouser",
-        packages=[
-            "bouser",
-            "bouser.helpers",
-            "bouser.ext",
-            "bouser.castiel",
-            "bouser.castiel.auth",
-            "bouser.web",
-            "twisted.plugins",
-        ],
+        packages=find_packages() + ["twisted.plugins"],
         zip_safe=False,
         package_data={
             'bouser.web': [

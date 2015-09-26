@@ -10,7 +10,6 @@ from bouser.castiel.mixin import RequestAuthMixin
 
 from bouser.helpers.api_helpers import get_json
 from bouser.helpers.plugin_helpers import BouserPlugin
-from bouser.utils import as_json
 from bouser.castiel.exceptions import EInvalidCredentials, EExpiredToken
 from bouser.castiel.objects import AuthTokenObject
 
