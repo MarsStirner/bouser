@@ -58,4 +58,5 @@ if __name__ == '__main__':
         from twisted.plugin import IPlugin, getPlugins
         list(getPlugins(IPlugin))
     except ImportError:
-        raise SystemExit("twisted not found.  Make sure you have installed the Twisted core package.")
+        print("Twisted not found.  Make sure you have installed the Twisted core package.")
+        print("Twisted Plugins won't be refreshed")
