@@ -11,6 +11,7 @@ from twisted.internet.task import LoopingCall
 from twisted.web.static import Data
 
 from zope.interface import implementer
+from bouser.castiel.auxiliary import AuxiliaryResource
 
 from bouser.castiel.mixin import RequestAuthMixin
 from bouser.castiel.rpc import CastielApiResource
@@ -76,6 +77,7 @@ class CastielService(Service, RequestAuthMixin, BouserPlugin):
 
         cas_resource.putChild('api', CastielApiResource())
         cas_resource.putChild('login', CastielLoginResource())
+        cas_resource.putChild('aux', AuxiliaryResource())
         cas_resource.putChild('test', TestResource())
         cas_resource.putChild('', Data('I am Castiel, angel of God', 'text/html'))
 
