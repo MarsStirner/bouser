@@ -31,7 +31,7 @@ def pretty_print(d, indent=0):
             result.write(u'\n%s- %s' % ('    '*indent, pretty_print(value, indent+1)))
     elif isinstance(d, dict):
         for key, value in sorted(d.items()):
-            result.write(u'\n%s%s: %s' % ('   '*indent, key, pretty_print(value, indent+1)))
+            result.write(u'\n%s%s: %s' % ('    '*indent, key, pretty_print(value, indent+1)))
     else:
         result.write(str(d))
     return result.getvalue()
