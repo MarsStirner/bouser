@@ -31,20 +31,16 @@ def parse_config(fp):
     return result
 
 
-def make_config(filename=None):
+def make_config(filename):
     config = {}
-    try:
-        with open('default.conf') as cfg_file:
+    _, ext = os.path.splitext(os.path.basename(filename))
+    if ext.lower() in ('yaml', 'yml'):
+        import yaml
+        with open(filename, 'rb') as cfg_file:
+            config.update(yaml.load(cfg_file))
+    elif ext.lower() in ('conf', 'cfg', 'ini'):
+        with open(filename, 'rt') as cfg_file:
             config.update(parse_config(cfg_file))
-    except (IOError, OSError):
-        print(u'CAUTION! Cannot load default config!')
-        print(u'Current directory = %s' % os.getcwdu())
-
-    if filename:
-        try:
-            with open(filename, 'rt') as cfg_file:
-                config.update(parse_config(cfg_file))
-        except (IOError, OSError):
-            print(u'Cannot load file: %s' % filename)
-            print(u'Cannot load config. Using defaults.')
+    else:
+        raise RuntimeError('Unsupported config format: %s. Only [yaml, yml] or [conf, cfg, ini] are allowed.' % ext)
     return config
