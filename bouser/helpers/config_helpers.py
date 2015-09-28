@@ -34,11 +34,11 @@ def parse_config(fp):
 def make_config(filename):
     config = {}
     _, ext = os.path.splitext(os.path.basename(filename))
-    if ext.lower() in ('yaml', 'yml'):
+    if ext.lower() in ('.yaml', '.yml'):
         import yaml
         with open(filename, 'rb') as cfg_file:
             config.update(yaml.load(cfg_file))
-    elif ext.lower() in ('conf', 'cfg', 'ini'):
+    elif ext.lower() in ('.conf', '.cfg', '.ini'):
         with open(filename, 'rt') as cfg_file:
             config.update(parse_config(cfg_file))
     else:
