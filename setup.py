@@ -14,7 +14,7 @@ if __name__ == '__main__':
         author=__author__,
         author_email="viruzzz.soft@gmail.com",
         license='ISC',
-        url="http://github.com/hitsl/bouser",
+        url="http://bitbucket.org/hitsl/bouser",
         packages=find_packages() + ["twisted.plugins"],
         zip_safe=False,
         package_data={
@@ -37,8 +37,7 @@ if __name__ == '__main__':
             'six',  # Compatibility
         ],
         extras_require={
-            'Auth.SVN': [],
-            'Auth.SASLDB': [],
+            'YAML': 'PyYAML',
         },
         classifiers=[
             "Development Status :: 4 - Beta",
