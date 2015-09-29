@@ -31,16 +31,20 @@ def parse_config(fp):
     return result
 
 
-def make_config(filename):
+def make_config(filename, fmt=None):
     config = {}
-    _, ext = os.path.splitext(os.path.basename(filename))
-    if ext.lower() in ('.yaml', '.yml'):
+    if fmt is None:
+        _, ext = os.path.splitext(os.path.basename(filename))
+        ext = ext[1:]
+        if ext.lower() in ('yaml', 'yml'):
+            fmt = 'yaml'
+        else:
+            fmt = 'conf'
+    if fmt == 'yaml':
         import yaml
         with open(filename, 'rb') as cfg_file:
             config.update(yaml.load(cfg_file))
-    elif ext.lower() in ('.conf', '.cfg', '.ini'):
+    else:
         with open(filename, 'rt') as cfg_file:
             config.update(parse_config(cfg_file))
-    else:
-        raise RuntimeError('Unsupported config format: %s. Only [yaml, yml] or [conf, cfg, ini] are allowed.' % ext)
     return config
