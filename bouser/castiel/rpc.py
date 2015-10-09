@@ -7,7 +7,7 @@ from twisted.web.resource import IResource, Resource
 from zope.interface import implementer
 
 from bouser.helpers.plugin_helpers import BouserPlugin, Dependency
-from bouser.utils import api_method, get_args
+from bouser.utils import api_method
 
 __author__ = 'viruzzz-kun'
 
@@ -26,8 +26,7 @@ class CastielApiResource(Resource, BouserPlugin):
         :param request:
         :return:
         """
-        if self.web.crossdomain(request):
-            return ''
+        self.web.crossdomain(request, allow_credentials=True)
 
         request.postpath = filter(None, request.postpath)
         ppl = len(request.postpath)
@@ -64,9 +63,8 @@ class CastielApiResource(Resource, BouserPlugin):
         :param request:
         :return:
         """
-        j = get_args(request)
-        login = j['login']
-        password = j['password']
+        login = request.all_args['login']
+        password = request.all_args['password']
         ato = yield self.service.acquire_token(login, password)
         defer.returnValue({
             'success': True,
@@ -83,11 +81,11 @@ class CastielApiResource(Resource, BouserPlugin):
         :param request:
         :return:
         """
-        j = get_args(request)
-        result = yield self.service.release_token(j['token'].decode('hex'))
+        hex_token = self.__get_hex_token(request)
+        result = yield self.service.release_token(hex_token.decode('hex'))
         defer.returnValue({
             'success': result,
-            'token': j['token'],
+            'token': hex_token,
         })
 
     @defer.inlineCallbacks
@@ -97,11 +95,8 @@ class CastielApiResource(Resource, BouserPlugin):
         :param request:
         :return:
         """
-        j = get_args(request)
-        prolong = j.get('prolong', False)
-        hex_token = j.get('token', '')
-        if len(hex_token) != 32:
-            raise Exception(u'Плохой токен аутентификации')
+        prolong = request.all_args.get('prolong', False)
+        hex_token = self.__get_hex_token(request)
         user_id, deadline = yield self.service.check_token(hex_token.decode('hex'), prolong)
         defer.returnValue({
             'success': True,
@@ -118,13 +113,13 @@ class CastielApiResource(Resource, BouserPlugin):
         :param request:
         :return:
         """
-        j = get_args(request)
-        success, deadline = yield self.service.prolong_token(j['token'].decode('hex'))
+        hex_token = self.__get_hex_token(request)
+        success, deadline = yield self.service.prolong_token(hex_token.decode('hex'))
         defer.returnValue({
             'success': success,
             'deadline': deadline,
             'ttl': deadline - time.time(),
-            'token': j['token'],
+            'token': hex_token,
         })
 
     @defer.inlineCallbacks
@@ -134,8 +129,7 @@ class CastielApiResource(Resource, BouserPlugin):
         :param request:
         :return:
         """
-        j = get_args(request)
-        user = yield self.service.is_valid_credentials(j['login'], j['password'])
+        user = yield self.service.is_valid_credentials(request.all_args['login'], request.all_args['password'])
         defer.returnValue({
             'success': True,
             'user_id': user.user_id,
@@ -143,9 +137,20 @@ class CastielApiResource(Resource, BouserPlugin):
 
     @defer.inlineCallbacks
     def get_user_id(self, request):
-        j = get_args(request)
-        user_id = yield self.service.get_user_id(j['token'].decode('hex'))
+        hex_token = self.__get_hex_token(request)
+        user_id = yield self.service.get_user_id(hex_token.decode('hex'))
         defer.returnValue({
             'success': True,
             'user_d': user_id,
         })
+
+    def __get_hex_token(self, request):
+        """
+        :type request: bouser.web.request.BouserRequest
+        :param request:
+        :return:
+        """
+        hex_token = request.all_args.get('token', request.getCookie(self.service.cookie_name))
+        if len(hex_token) != 32:
+            raise Exception(u'Bad auth token')
+        return hex_token

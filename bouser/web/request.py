@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import json
 from urllib import urlencode
+from blinker._utilities import lazy_property
 
 from jinja2.exceptions import TemplateNotFound
 from twisted.python.log import callWithContext
@@ -191,3 +193,16 @@ class BouserRequest(Request):
     def log(self):
         # Awkward
         self.site.log(self)
+
+    @lazy_property
+    def all_args(self):
+        content = self.content
+        if content is not None:
+            try:
+                return json.loads(content.getvalue())
+            except ValueError:
+                pass
+        return dict(
+            (key, value[0])
+            for key, value in self.args.iteritems()
+        )

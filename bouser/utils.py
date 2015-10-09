@@ -2,11 +2,12 @@
 import datetime
 import json
 import functools
-from Queue import Queue
+import Queue
 import six
 from twisted.application.service import Service
 
 from twisted.internet import defer
+from twisted.python import deprecate
 from bouser.excs import SerializableBaseException, ExceptionWrapper
 from twisted.web.http import Request
 from bouser.web.cors import OptionsFinish
@@ -82,18 +83,14 @@ def safe_int(value):
         return value
 
 
+@deprecate.deprecated
 def get_args(request):
-    content = request.content
-    if content is not None:
-        try:
-            return json.loads(content.getvalue())
-        except ValueError:
-            pass
-    # This is primarily for testing purposes - to pass arguments in url
-    return dict(
-        (key, value[0])
-        for key, value in request.args.iteritems()
-    )
+    """
+    :type request: bouser.web.request.BouserRequest
+    :param request:
+    :return:
+    """
+    return request.all_args
 
 
 def transfer_fields(dest, src, fields):
@@ -103,7 +100,7 @@ def transfer_fields(dest, src, fields):
 
 class ThreadWrapper(Service):
     def __init__(self, name=None):
-        self.q = Queue()
+        self.q = Queue.Queue()
         self.thread = None
         self.name = name
 
@@ -147,13 +144,20 @@ class ThreadWrapper(Service):
         :return:
         """
         while 1:
-            func, args, kwargs, deferred = self.q.get(timeout=1)
-            if not func:
-                self.thread = None
-                break
+            try:
+                func, args, kwargs, deferred = self.q.get(timeout=1)
+            except Queue.Empty:
+                continue
+            else:
+                if not func:
+                    self.thread = None
+                    break
 
-            defer.maybeDeferred(func, *args, **kwargs)\
-                .addCallbacks(self._cb, self._eb, callbackArgs=(deferred,), errbackArgs=(deferred,))
+                defer.maybeDeferred(
+                    func, *args, **kwargs
+                ).addCallbacks(
+                    self._cb, self._eb, callbackArgs=(deferred,), errbackArgs=(deferred,)
+                )
 
     def call(self, func, *args, **kwargs):
         """
