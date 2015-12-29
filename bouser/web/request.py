@@ -5,10 +5,9 @@ from urllib import urlencode
 from blinker._utilities import lazy_property
 
 from jinja2.exceptions import TemplateNotFound
-from twisted.python.log import callWithContext
 from zope.interface import implementer
 from twisted.internet import defer
-from twisted.python import reflect, log
+from twisted.python import reflect, log, context
 from twisted.python.compat import intToBytes
 from twisted.web import resource, html, http, error, microdom
 from twisted.web.server import Request, NOT_DONE_YET, supportedMethods
@@ -157,7 +156,7 @@ class BouserRequest(Request):
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
-            callWithContext({'system': 'RequestError'}, traceback.print_exc)
+            log.msg(tb, system='Request:Error')
 
             body = resource.ErrorPage(
                 http.INTERNAL_SERVER_ERROR,
