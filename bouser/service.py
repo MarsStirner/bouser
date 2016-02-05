@@ -3,6 +3,7 @@
 import cStringIO
 
 import blinker
+from twisted.internet import defer
 from twisted.python import log
 from twisted.application.service import MultiService
 
@@ -46,8 +47,9 @@ class Application(MultiService):
         self.modules = []
         self.fail = False
 
+    @defer.inlineCallbacks
     def reload_config(self):
-        config = self.config = make_config(self.options['config'])
+        config = self.config = yield make_config(self.options['config'])
         log.msg(pretty_print(config))
         self.modules = []
         self.common_config = config.get('common')
@@ -55,9 +57,10 @@ class Application(MultiService):
             log.msg(name, system='Loading')
             self.modules.append(make_plugin(name, cfg))
 
+    @defer.inlineCallbacks
     def startService(self):
         log.msg('...Booting...', system="Bouser")
-        self.reload_config()
+        yield self.reload_config()
         log.callWithContext({"system": "Bootstrap"}, boot.send, self)
         log.callWithContext({"system": "Checking Dependencies"}, check_deps.send, self)
         if self.fail:
