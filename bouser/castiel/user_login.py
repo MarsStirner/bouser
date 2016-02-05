@@ -86,7 +86,7 @@ class CastielLoginResource(Resource, BouserPlugin):
 
             cookie_domain = self.service.get_cookie_domain(domain)
             request.addCookie(
-                self.service.cookie_name, token_txt, domain=cookie_domain,
+                str(self.service.cookie_name), token_txt, domain=str(cookie_domain),
                 path='/', comment='Castiel Auth Cookie'
             )
             fm.back = None
