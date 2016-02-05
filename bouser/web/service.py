@@ -51,7 +51,7 @@ class WebService(MultiService, BouserPlugin):
 
         self.allowed_domains = allowed_domains | {self.cors_domain}
 
-        service = strports.service(description, site, reactor=reactor)
+        service = strports.service(str(description), site, reactor=reactor)
         service.setServiceParent(self)
 
         self.root_resource = root_resource
