@@ -43,8 +43,13 @@ class WebService(MultiService, BouserPlugin):
         ))
 
         self.cors_domain = config.get('cors-domain', 'http://127.0.0.1:5000/')
-        allowed_domains = set(filter(None, config.get('allowed-domains', '').replace(',', ' ').split(' ')))
-        self.allowed_domains = set(allowed_domains) | {self.cors_domain}
+        allowed_domains = config.get('allowed-domains', [])
+        if isinstance(allowed_domains, basestring):
+            allowed_domains = filter(None, allowed_domains.replace(',', ' ').split(' '))
+
+        allowed_domains = set(allowed_domains)
+
+        self.allowed_domains = allowed_domains | {self.cors_domain}
 
         service = strports.service(description, site, reactor=reactor)
         service.setServiceParent(self)
