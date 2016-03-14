@@ -74,7 +74,7 @@ class WebService(MultiService, BouserPlugin):
                 if candidate_domain in self.allowed_domains:
                     domain = candidate_domain
 
-        request.setHeader('Access-Control-Allow-Origin', domain)
+        request.setHeader('Access-Control-Allow-Origin', str(domain))
         if allow_credentials:
             request.setHeader('Access-Control-Allow-Credentials', 'true')
         if request.method == 'OPTIONS' and request.requestHeaders.hasHeader('Access-Control-Request-Method'):
