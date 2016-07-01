@@ -22,19 +22,9 @@ class MethodNotFoundException(SerializableBaseException):
         self.message = 'Method %s not found' % method_name
 
 
-class LockNotFound(SerializableBaseException):
-    def __init__(self, object_id):
-        self.message = 'Lock not found for object "%s"' % object_id
-
-
 class BadRequest(SerializableBaseException):
     def __init__(self):
         self.message = 'Bad Request'
-
-
-class LockerNotSet(SerializableBaseException):
-    def __init__(self):
-        self.message = 'Locker not set'
 
 
 class Unauthorized(SerializableBaseException):

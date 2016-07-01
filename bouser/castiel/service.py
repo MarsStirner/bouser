@@ -150,7 +150,7 @@ class CastielService(Service, RequestAuthMixin, BouserPlugin):
         """
         Returns users Auth Token Object
         :param token: Auth token
-        :rtype: AuthTokenObject | None
+        :rtype: Deferred <AuthTokenObject | None>
         :return:
         """
         if token not in self.tokens:
