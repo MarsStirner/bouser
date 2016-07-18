@@ -44,18 +44,18 @@ class Application(MultiService):
         self.options = options
         self.config = {}
         self.common_config = {}
-        self.modules = []
+        self.modules = {}
         self.fail = False
 
     @defer.inlineCallbacks
     def reload_config(self):
         config = self.config = yield make_config(self.options['config'])
         log.msg(pretty_print(config))
-        self.modules = []
+        self.modules = {}
         self.common_config = config.get('common')
         for name, cfg in config.get('module', {}).iteritems():
             log.msg(name, system='Loading')
-            self.modules.append(make_plugin(name, cfg))
+            self.modules[name] = make_plugin(name, cfg)
 
     @defer.inlineCallbacks
     def startService(self):

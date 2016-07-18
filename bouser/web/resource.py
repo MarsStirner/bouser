@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from bouser.helpers.plugin_helpers import Dependency
 from twisted.web import resource
 
 __author__ = 'viruzzz-kun'
@@ -6,15 +7,21 @@ __author__ = 'viruzzz-kun'
 
 class DefaultRootResource(resource.Resource):
     def __init__(self):
-        from twisted.web.static import Data
         resource.Resource.__init__(self)
-        self.putChild('', Data(u"""
-<!DOCTYPE html>
-<html>
-<head><style>body { color: #fff; background-color: #027eae; font-family: "Segoe UI", "Lucida Grande", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; }
-a, a:visited, a:hover { color: #fff; }</style></head>
-<body><h1>Bouser</h1><h2>Подсистема всякой ерунды</h2>Давайте придумаем более человеческое название...</body>
-</html>""".encode('utf-8'), 'text/html; charset=utf-8'))
+        self.putChild('', RenderedRootResource())
+
+
+class RenderedRootResource(resource.Resource):
+    bouser = Dependency('bouser')
+
+    def render(self, request):
+        """
+        @type request: bouser.web.request.BouserRequest
+        @param request:
+        @return:
+        """
+        request.setHeader('Content-Type', 'text/html; charset=utf-8')
+        return request.render_template('root.html', components=self.bouser.modules)
 
 
 class AutoRedirectResource(resource.Resource):
