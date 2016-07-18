@@ -18,6 +18,15 @@ __created__ = '08.02.2015'
 re_referrer_origin = re.compile(u'\Ahttps?://(?P<origin>[\.\w\d]+)(:\d+)?/.*', (re.U | re.I))
 
 
+def alter_back(back, args, token):
+    if 'with_token' in args:
+        if '?' in back:
+            return back + '&token=%s' % token
+        else:
+            return back + '?token=%s' % token
+    return back
+
+
 @implementer(IResource)
 class CastielLoginResource(Resource, BouserPlugin):
     isLeaf = True
@@ -49,6 +58,7 @@ class CastielLoginResource(Resource, BouserPlugin):
         else:
             # Token is valid - just redirect
             back, fm.back = fm.back, None
+            back = alter_back(back, request.args, token)
             defer.returnValue(redirectTo(back, request))
 
     @defer.inlineCallbacks
@@ -90,5 +100,6 @@ class CastielLoginResource(Resource, BouserPlugin):
                 path='/', comment='Castiel Auth Cookie'
             )
             fm.back = None
+            back = alter_back(back, request.args, token_txt)
             defer.returnValue(redirectTo(back, request))
 
