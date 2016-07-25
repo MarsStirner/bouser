@@ -58,7 +58,7 @@ class CastielLoginResource(Resource, BouserPlugin):
         else:
             # Token is valid - just redirect
             back, fm.back = fm.back, None
-            back = alter_back(back, request.args, token)
+            back = alter_back(back, request.args, token.encode('hex'))
             defer.returnValue(redirectTo(back, request))
 
     @defer.inlineCallbacks
