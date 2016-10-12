@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from zope.interface import Interface, Attribute
+from zope.interface import Interface, Attribute, classImplements
 
 __author__ = 'viruzzz-kun'
 
@@ -63,3 +63,9 @@ class IAuthObject(Interface):
     user_id = Attribute('user_id', 'User unique id')
     login = Attribute('login', 'User login')
     groups = Attribute('groups', 'User groups or roles')
+
+    def get_description(self):
+        """
+        Get text description of AuthObject
+        :return: string
+        """

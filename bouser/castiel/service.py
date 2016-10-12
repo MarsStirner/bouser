@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 import time
-from UserDict import UserDict
+import datetime
 import os
-
 import msgpack
+
+from UserDict import UserDict
+
 from twisted.python.components import registerAdapter
 from twisted.application.service import Service
 from twisted.internet import defer
 from twisted.internet.task import LoopingCall
 from twisted.web.static import Data
+from twisted.logger import Logger
 
 from zope.interface import implementer
 from bouser.castiel.auxiliary import AuxiliaryResource
-
 from bouser.castiel.mixin import RequestAuthMixin
 from bouser.castiel.rpc import CastielApiResource
 from bouser.castiel.user_login import CastielLoginResource
@@ -23,8 +25,15 @@ from bouser.web.resource import AutoRedirectResource
 from .objects import AuthTokenObject
 from .exceptions import EExpiredToken
 from .interfaces import ICasService, IAuthenticator
+from bouser.bouser_simplelogs import SimplelogsLogObserver
+
 
 __author__ = 'viruzzz-kun'
+
+
+logger = Logger(
+    observer=SimplelogsLogObserver(system_name='Coldstar.Castiel'),
+    namespace="coldstar.castiel")
 
 
 class CastielUserRegistry(UserDict, msgpack_helpers.Serializable):
@@ -141,10 +150,18 @@ class CastielService(Service, RequestAuthMixin, BouserPlugin):
 
     def _clean_expired(self):
         now = time.time()
+        expired_users = []
         for token, ato in self.tokens.items():
             if ato.deadline < now:
                 print "token", token.encode('hex'), "expired"
+                expired_users.append(ato.object.get_description())
                 del self.tokens[token]
+
+        if expired_users:
+            logger.info(u'Время жизни сессии истекло {dt:%d.%m.%Y %H:%M:%S} для следующих '
+                        u'пользователей: {expired_users}',
+                        expired_users=u', '.join(expired_users), dt=datetime.datetime.now(),
+                        tags=['AUTH'])
 
     def get_user_id(self, token):
         """

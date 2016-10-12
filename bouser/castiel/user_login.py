@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
+import datetime
 
 from twisted.internet import defer
 from twisted.web.resource import IResource, Resource
 from twisted.web.util import redirectTo
+from twisted.logger import Logger
 from zope.interface import implementer
 
 from bouser.helpers.plugin_helpers import BouserPlugin, Dependency
 from bouser.castiel.exceptions import EExpiredToken, ETokenAlreadyAcquired, EInvalidCredentials
 from bouser.web.interfaces import IWebSession
+from bouser.bouser_simplelogs import SimplelogsLogObserver
+
+
+logger = Logger(
+    observer=SimplelogsLogObserver(system_name='Coldstar.Castiel'),
+    namespace="coldstar.castiel")
+
 
 __author__ = 'viruzzz-kun'
 __created__ = '08.02.2015'
@@ -75,11 +84,17 @@ class CastielLoginResource(Resource, BouserPlugin):
             login = request.args['login'][0].decode('utf-8')
             password = request.args['password'][0].decode('utf-8')
             ato = yield self.service.acquire_token(login, password)
+            logger.info(u'Пользователь {user_descr} аутентифицировался {dt:%d.%m.%Y %H:%M:%S}',
+                        user_descr=ato.object.get_description(), dt=datetime.datetime.now(),
+                        tags=['AUTH'])
         except EInvalidCredentials:
             fm.flash_message(dict(
                 text=u"Неверное имя пользователя или пароль",
                 severity='danger'
             ))
+            logger.warn(u'Неудачная попытка аутентификации по логину {login} {dt:%d.%m.%Y %H:%M:%S} '
+                        u'(Неверное имя пользователя или пароль)',
+                        login=login, dt=datetime.datetime.now(), tags=['AUTH'])
             defer.returnValue(redirectTo(request.uri, request))
         except ETokenAlreadyAcquired:
             fm.back = None
@@ -102,4 +117,3 @@ class CastielLoginResource(Resource, BouserPlugin):
             fm.back = None
             back = alter_back(back, request.args, token_txt)
             defer.returnValue(redirectTo(back, request))
-
