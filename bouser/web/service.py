@@ -80,6 +80,6 @@ class WebService(MultiService, BouserPlugin):
         if request.method == 'OPTIONS' and request.requestHeaders.hasHeader('Access-Control-Request-Method'):
             # Preflight Request
             request.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            request.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+            request.setHeader('Access-Control-Allow-Headers', 'Content-Type, If-Modified-Since, Cache-Control, Pragma')
             request.setHeader('Access-Control-Max-Age', '600')
             raise OptionsFinish

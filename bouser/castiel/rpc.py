@@ -53,6 +53,9 @@ class CastielApiResource(Resource, BouserPlugin):
             elif leaf == 'get_user_id':
                 return self.get_user_id(request)
 
+            elif leaf == 'active_users_count':
+                return self.get_active_users_count(request)
+
         request.setResponseCode(404)
         return '404 Not Found'
 
@@ -120,6 +123,19 @@ class CastielApiResource(Resource, BouserPlugin):
             'deadline': deadline,
             'ttl': deadline - time.time(),
             'token': hex_token,
+        })
+
+    @defer.inlineCallbacks
+    def get_active_users_count(self, request):
+        """
+        Get approximate number of active users
+        :param request:
+        :return:
+        """
+        count = yield self.service.get_active_users_count()
+        defer.returnValue({
+            'success': True,
+            'count': count
         })
 
     @defer.inlineCallbacks

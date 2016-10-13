@@ -135,15 +135,28 @@ class CastielService(Service, RequestAuthMixin, BouserPlugin):
             return defer.fail(EExpiredToken(token))
         if prolong:
             self.prolong_token(token)
+        ato.modified = time.time()
         return defer.succeed((ato.user_id, ato.deadline))
 
     def prolong_token(self, token):
         if token not in self.tokens:
             return defer.fail(EExpiredToken(token))
-        deadline = time.time() + self.expiry_time
+        now = time.time()
+        deadline = now + self.expiry_time
         ato = self.tokens[token]
         ato.deadline = deadline
+        ato.modified = now
         return defer.succeed((True, deadline))
+
+    def get_active_users_count(self):
+        """Return number of tokens that were updated in last 3 minutes"""
+        now = time.time()
+        inactivity_duration = 180
+        count = 0
+        for token in self.tokens.itervalues():
+            if now - token.modified < inactivity_duration:
+                count += 1
+        return defer.succeed(count)
 
     def is_valid_credentials(self, login, password):
         return self.auth.get_user(login, password)
