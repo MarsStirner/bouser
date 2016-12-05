@@ -73,7 +73,7 @@ class SimplelogsLogObserver(object):
                 'version': None
             },
             'data': message,
-            'tags': event.get('tags')
+            'tags': event.get('tags') or []
         }
 
         self._send(data)
@@ -92,16 +92,15 @@ class SimplelogsLogObserver(object):
         )
 
         def cbBody(body):
-            print('Response body:')
-            print(body)
+            return body
 
         def cbResponse(response):
             if 200 < response.code or response.code > 299:
                 log.msg('Error sending to simplelogs: {0} {1}'.format(
                     response.code, response.phrase).encode('utf-8'))
-            # d = readBody(response)
-            # d.addCallback(cbBody)
-            # return d
+            d = readBody(response)
+            d.addCallback(cbBody)
+            return d
 
         d.addCallback(cbResponse)
 
