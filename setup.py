@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 __author__ = 'viruzzz-kun'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 if __name__ == '__main__':
